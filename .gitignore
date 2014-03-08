@@ -1,7 +1,9 @@
 *.gem
 *.rbc
 .bundle
+.bin
 .config
+vendor/bundle
 coverage
 InstalledFiles
 lib/bundler/man
