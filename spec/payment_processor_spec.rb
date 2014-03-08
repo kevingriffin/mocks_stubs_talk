@@ -6,22 +6,16 @@ describe PaymentProcessor do
     subject(:processor) { PaymentProcessor.new }
     let (:user) { User.new }
 
-    before(:each) do
-      WebMock.disable_net_connect!
-    end
-
     context 'when succeeded' do
-
-      before(:each) do
-        mock_request(success_response)
-      end
 
       let(:parameters) do
         {amount: 1400, currency: 'jpy', card: @token, description: 'Successful charge'}
       end
 
+      let(:connection) { SuccessConnection.new }
+
       it 'gives the user premium access' do
-        processor.process(user, parameters)
+        processor.process(user, parameters, connection)
         expect(user.premium?).to be_true
       end
 
@@ -32,12 +26,10 @@ describe PaymentProcessor do
         {amount: 1400, currency: 'jpy', card: 'FAILURE_TOKEN', description: 'Failure charge'}
       end
 
-      before(:each) do
-        mock_request(failure_response)
-      end
+      let(:connection) { FailureConnection.new }
 
       it 'does not give the user premium access' do
-        processor.process(user, parameters)
+        processor.process(user, parameters, connection)
         expect(user.premium?).to be_false
       end
 
@@ -45,67 +37,62 @@ describe PaymentProcessor do
   end
 end
 
-def mock_request(return_data)
-  stub_request(:post, 'https://sk_test_laAkglBmXuzzxpU5T3h8OUiZ:@api.stripe.com/v1/charges').to_return(body: return_data, status: 200)
-end
+class SuccessConnection
+  def post_data(params)
+    '
+  {
+    "id": "ch_103cxv2aR6f6MydqHbfpBUKs",
+    "object": "charge",
+    "created": 1394275693,
+    "livemode": false,
+    "paid": true,
+    "amount": 1400,
+    "currency": "jpy",
+    "refunded": false,
+    "card": {
+      "id": "card_103cxu2aR6f6MydqZ0A30M0T",
+      "object": "card",
+      "last4": "4242",
+      "type": "Visa",
+      "exp_month": 8,
+      "exp_year": 2015,
+      "fingerprint": "iMOxhFMRYQ1AHlyg",
+      "customer": null,
+      "country": "US",
+      "name": null,
+      "address_line1": null,
+      "address_line1_check": null,
+      "address_zip_check": null
+    },
+    "captured": true,
+    "refunds": [
 
-def success_response
-  '
-{
-  "id": "ch_103cxv2aR6f6MydqHbfpBUKs",
-  "object": "charge",
-  "created": 1394275693,
-  "livemode": false,
-  "paid": true,
-  "amount": 1400,
-  "currency": "usd",
-  "refunded": false,
-  "card": {
-    "id": "card_103cxu2aR6f6MydqZ0A30M0T",
-    "object": "card",
-    "last4": "4242",
-    "type": "Visa",
-    "exp_month": 8,
-    "exp_year": 2015,
-    "fingerprint": "iMOxhFMRYQ1AHlyg",
+    ],
+    "balance_transaction": "txn_103cxv2aR6f6MydqewnTtauv",
+    "failure_message": null,
+    "failure_code": null,
+    "amount_refunded": 0,
     "customer": null,
-    "country": "US",
-    "name": null,
-    "address_line1": null,
-    "address_line2": null,
-    "address_city": null,
-    "address_state": null,
-    "address_zip": null,
-    "address_country": null,
-    "cvc_check": null,
-    "address_line1_check": null,
-    "address_zip_check": null
-  },
-  "captured": true,
-  "refunds": [
+    "invoice": null,
+    "description": "Charge for test@example.com",
+    "dispute": null,
+    "metadata": {
+    }
+  }'
 
-  ],
-  "balance_transaction": "txn_103cxv2aR6f6MydqewnTtauv",
-  "failure_message": null,
-  "failure_code": null,
-  "amount_refunded": 0,
-  "customer": null,
-  "invoice": null,
-  "description": "Charge for test@example.com",
-  "dispute": null,
-  "metadata": {
-  }
-}'
-
+  end
 end
 
-def failure_response
-  '
-{
-  "error": {
-    "type": "invalid_request_error",
-    "message": "You cannot use a Stripe token more than once: tok_103cy82aR6f6MydqB7tuTNB5"
+class FailureConnection
+
+  def post_data(params)
+    '
+  {
+    "error": {
+      "type": "invalid_request_error",
+      "message": "You cannot use a Stripe token more than once: tok_103cy82aR6f6MydqB7tuTNB5"
+    }
   }
-}
-  '
+    '
+  end
 end
