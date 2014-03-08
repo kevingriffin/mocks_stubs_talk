@@ -4,3 +4,4 @@ require_relative '../lib/user'
 
 require 'uri'
 require 'net/http'
+require 'webmock/rspec'

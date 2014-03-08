@@ -6,10 +6,14 @@ describe PaymentProcessor do
     subject(:processor) { PaymentProcessor.new }
     let (:user) { User.new }
 
+    before(:each) do
+      WebMock.disable_net_connect!
+    end
+
     context 'when succeeded' do
 
       before(:each) do
-        @token = fetch_test_payment_token
+        mock_request(success_response)
       end
 
       let(:parameters) do
@@ -28,6 +32,10 @@ describe PaymentProcessor do
         {amount: 1400, currency: 'jpy', card: 'FAILURE_TOKEN', description: 'Failure charge'}
       end
 
+      before(:each) do
+        mock_request(failure_response)
+      end
+
       it 'does not give the user premium access' do
         processor.process(user, parameters)
         expect(user.premium?).to be_false
@@ -37,22 +45,67 @@ describe PaymentProcessor do
   end
 end
 
-def fetch_test_payment_token
-  payment_information = {'card[number]' => '4242424242424242', 'card[exp_month]' =>  '12', 'card[exp_year]' => '2015',  'card[cvc]' => '123'}
+def mock_request(return_data)
+  stub_request(:post, 'https://sk_test_laAkglBmXuzzxpU5T3h8OUiZ:@api.stripe.com/v1/charges').to_return(body: return_data, status: 200)
+end
 
-  uri = URI('https://api.stripe.com/v1/tokens')
-  http = Net::HTTP.new(uri.host, uri.port)
-  http.use_ssl = true
+def success_response
+  '
+{
+  "id": "ch_103cxv2aR6f6MydqHbfpBUKs",
+  "object": "charge",
+  "created": 1394275693,
+  "livemode": false,
+  "paid": true,
+  "amount": 1400,
+  "currency": "usd",
+  "refunded": false,
+  "card": {
+    "id": "card_103cxu2aR6f6MydqZ0A30M0T",
+    "object": "card",
+    "last4": "4242",
+    "type": "Visa",
+    "exp_month": 8,
+    "exp_year": 2015,
+    "fingerprint": "iMOxhFMRYQ1AHlyg",
+    "customer": null,
+    "country": "US",
+    "name": null,
+    "address_line1": null,
+    "address_line2": null,
+    "address_city": null,
+    "address_state": null,
+    "address_zip": null,
+    "address_country": null,
+    "cvc_check": null,
+    "address_line1_check": null,
+    "address_zip_check": null
+  },
+  "captured": true,
+  "refunds": [
 
-  req = Net::HTTP::Post.new(uri.path)
+  ],
+  "balance_transaction": "txn_103cxv2aR6f6MydqewnTtauv",
+  "failure_message": null,
+  "failure_code": null,
+  "amount_refunded": 0,
+  "customer": null,
+  "invoice": null,
+  "description": "Charge for test@example.com",
+  "dispute": null,
+  "metadata": {
+  }
+}'
 
-  req.add_field("Stripe-Version", "2014-01-31")
-  req.basic_auth('sk_test_laAkglBmXuzzxpU5T3h8OUiZ', '')
-  req.set_form_data(payment_information)
+end
 
-  result_json = http.request(req).body
-
-  puts result_json
-
-  JSON.parse(result_json)['id']
+def failure_response
+  '
+{
+  "error": {
+    "type": "invalid_request_error",
+    "message": "You cannot use a Stripe token more than once: tok_103cy82aR6f6MydqB7tuTNB5"
+  }
+}
+  '
 end
