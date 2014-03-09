@@ -4,95 +4,83 @@ describe PaymentProcessor do
   describe '.process' do
 
     subject(:processor) { PaymentProcessor.new }
+
     let (:user) { User.new }
+    let(:connection) { MockConnection.new }
+
+    let(:parameters) do
+      {amount: 1400, currency: 'jpy', card: 'token', description: 'Charge Test'}
+    end
 
     context 'when succeeded' do
 
-      let(:parameters) do
-        {amount: 1400, currency: 'jpy', card: @token, description: 'Successful charge'}
-      end
-
-      let(:connection) { SuccessConnection.new }
+      let(:result) { MockResult.new(status: :success) }
 
       it 'gives the user premium access' do
-        processor.process(user, parameters, connection)
+        processor.process(user, parameters, connection, result)
         expect(user.premium?).to be_true
+        expect(connection.posted_params).to equal parameters
       end
 
     end
 
     context 'when failed' do
-      let(:parameters) do
-        {amount: 1400, currency: 'jpy', card: 'FAILURE_TOKEN', description: 'Failure charge'}
-      end
-
-      let(:connection) { FailureConnection.new }
+      let(:result) { MockResult.new(status: :failure) }
 
       it 'does not give the user premium access' do
-        processor.process(user, parameters, connection)
+        processor.process(user, parameters, connection, result)
         expect(user.premium?).to be_false
+        expect(connection.posted_params).to equal parameters
       end
 
+    end
+
+    context 'when errored' do
+      let(:result) { MockResult.new(status: :error) }
+
+      it 'does not give the user premium access' do
+        processor.process(user, parameters, connection, result)
+        expect(user.premium?).to be_false
+        expect(connection.posted_params).to equal parameters
+      end
+
+    end
+
+    context 'when unknown status' do
+      let(:result) { MockResult.new(status: :bad_state) }
+
+      it 'throws an exception' do
+        expect { processor.process(user, parameters, connection, result) }.to raise_error(StandardError)
+        expect(user.premium?).to be_false
+      end
     end
   end
 end
 
-class SuccessConnection
+class MockConnection
+  attr_reader :posted_params
   def post_data(params)
-    '
-  {
-    "id": "ch_103cxv2aR6f6MydqHbfpBUKs",
-    "object": "charge",
-    "created": 1394275693,
-    "livemode": false,
-    "paid": true,
-    "amount": 1400,
-    "currency": "jpy",
-    "refunded": false,
-    "card": {
-      "id": "card_103cxu2aR6f6MydqZ0A30M0T",
-      "object": "card",
-      "last4": "4242",
-      "type": "Visa",
-      "exp_month": 8,
-      "exp_year": 2015,
-      "fingerprint": "iMOxhFMRYQ1AHlyg",
-      "customer": null,
-      "country": "US",
-      "name": null,
-      "address_line1": null,
-      "address_line1_check": null,
-      "address_zip_check": null
-    },
-    "captured": true,
-    "refunds": [
-
-    ],
-    "balance_transaction": "txn_103cxv2aR6f6MydqewnTtauv",
-    "failure_message": null,
-    "failure_code": null,
-    "amount_refunded": 0,
-    "customer": null,
-    "invoice": null,
-    "description": "Charge for test@example.com",
-    "dispute": null,
-    "metadata": {
-    }
-  }'
-
+    @posted_params = params
   end
 end
 
-class FailureConnection
+class MockResult
+  def initialize(status:)
+    @status = status
+  end
 
-  def post_data(params)
-    '
-  {
-    "error": {
-      "type": "invalid_request_error",
-      "message": "You cannot use a Stripe token more than once: tok_103cy82aR6f6MydqB7tuTNB5"
-    }
-  }
-    '
+  def parse!(result_json)
+  end
+
+  def success?
+    @status.to_s == 'success'
+  end
+
+  def failure?
+    @status.to_s == 'failure'
+  end
+
+  def error?
+    @status.to_s == 'error'
   end
 end
