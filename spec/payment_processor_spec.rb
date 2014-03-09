@@ -16,6 +16,15 @@ describe PaymentProcessor do
       processor.with_connection(connection).with_result(result)
     end
 
+    context 'in all cases' do
+      let(:result) {}
+
+      it 'should receieve mocks that match its dependencies' do
+        PaymentProcessorConnection.should substitute_for MockConnection
+        ChargeResponse.should substitute_for MockResult
+      end
+    end
+
     context 'when succeeded' do
 
       let(:result) { MockResult.new(status: :success) }
@@ -67,29 +76,19 @@ describe PaymentProcessor do
 end
 
 class MockConnection
+  Surrogate.endow self
   attr_reader :posted_params
-  def post_data(params)
-    @posted_params = params
-  end
+
+  define(:post_data) { |params| @posted_params = params }
 end
 
 class MockResult
-  def initialize(status:)
-    @status = status
-  end
+  Surrogate.endow self
+  define(:initialize) { |status:| @status = status }
 
-  def parse!(result_json)
-  end
+  define(:parse!) { |result_json| }
 
-  def success?
-    @status.to_s == 'success'
-  end
-
-  def failure?
-    @status.to_s == 'failure'
-  end
-
-  def error?
-    @status.to_s == 'error'
-  end
+  define(:success?) { @status.to_s == 'success' }
+  define(:failure?) { @status.to_s == 'failure' }
+  define(:error?)   { @status.to_s == 'error' }
 end
