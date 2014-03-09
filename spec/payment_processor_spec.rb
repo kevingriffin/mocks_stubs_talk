@@ -12,12 +12,17 @@ describe PaymentProcessor do
       {amount: 1400, currency: 'jpy', card: 'token', description: 'Charge Test'}
     end
 
+    before(:each) do
+      processor.with_connection(connection).with_result(result)
+    end
+
     context 'when succeeded' do
 
       let(:result) { MockResult.new(status: :success) }
 
       it 'gives the user premium access' do
-        processor.process(user, parameters, connection, result)
+        processor.process(user, parameters)
+
         expect(user.premium?).to be_true
         expect(connection.posted_params).to equal parameters
       end
@@ -28,7 +33,8 @@ describe PaymentProcessor do
       let(:result) { MockResult.new(status: :failure) }
 
       it 'does not give the user premium access' do
-        processor.process(user, parameters, connection, result)
+        processor.process(user, parameters)
+
         expect(user.premium?).to be_false
         expect(connection.posted_params).to equal parameters
       end
@@ -39,7 +45,8 @@ describe PaymentProcessor do
       let(:result) { MockResult.new(status: :error) }
 
       it 'does not give the user premium access' do
-        processor.process(user, parameters, connection, result)
+        processor.process(user, parameters)
+
         expect(user.premium?).to be_false
         expect(connection.posted_params).to equal parameters
       end
@@ -50,10 +57,12 @@ describe PaymentProcessor do
       let(:result) { MockResult.new(status: :bad_state) }
 
       it 'throws an exception' do
-        expect { processor.process(user, parameters, connection, result) }.to raise_error(StandardError)
+        expect { processor.process(user, parameters) }.to raise_error(StandardError)
         expect(user.premium?).to be_false
       end
+
     end
+
   end
 end
 

@@ -1,13 +1,16 @@
 require 'uri'
 require 'net/http'
 require 'json'
+require 'deject'
 
 class PaymentProcessor
-  def process(user, payment_information, connection = nil, result = nil)
-    payment_connection = connection || PaymentProcessorConnection.new
-    result             = result     || ChargeResponse.new
+  Deject self
 
-    result_json = payment_connection.post_data(payment_information)
+  dependency(:connection) { PaymentProcessorConnection.new }
+  dependency(:result) { ChargeResponse.new }
+
+  def process(user, payment_information)
+    result_json = connection.post_data(payment_information)
 
     result.parse!(result_json)
 
