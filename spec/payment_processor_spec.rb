@@ -17,6 +17,7 @@ describe PaymentProcessor do
     end
 
     context 'in all cases' do
+      
       let(:result) {}
 
       it 'should receieve mocks that match its dependencies' do
