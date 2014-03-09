@@ -9,7 +9,7 @@ describe PaymentProcessor do
     context 'when succeeded' do
 
       let(:parameters) do
-        {amount: 1400, currency: 'jpy', card: @token, description: 'Successful charge'}
+        {amount: 1400, currency: 'jpy', card: 'token', description: 'Successful charge'}
       end
 
       before(:each) do

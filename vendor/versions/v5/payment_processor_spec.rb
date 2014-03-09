@@ -9,7 +9,7 @@ describe PaymentProcessor do
     context 'when succeeded' do
 
       let(:parameters) do
-        {amount: 1400, currency: 'jpy', card: @token, description: 'Successful charge'}
+        {amount: 1400, currency: 'jpy', card: 'token', description: 'Successful charge'}
       end
 
       let(:connection) { SuccessConnection.new }
@@ -23,7 +23,7 @@ describe PaymentProcessor do
 
     context 'when failed' do
       let(:parameters) do
-        {amount: 1400, currency: 'jpy', card: 'FAILURE_TOKEN', description: 'Failure charge'}
+        {amount: 1400, currency: 'jpy', card: 'token', description: 'Failure charge'}
       end
 
       let(:connection) { FailureConnection.new }
