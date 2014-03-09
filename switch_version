@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+
+class SwitchVersion
+  MAX_VERSION = 8
+  FILES = %w[lib/payment_processor.rb spec/payment_processor_spec.rb]
+
+  def self.run(version_number)
+    version = Integer(version_number) rescue nil
+
+    unless version && 0 < version && version <= MAX_VERSION
+      abort "Please pass a valid (0 - #{MAX_VERSION}) version number"
+    end
+
+    FILES.each do |file_path|
+      %x[cp ./vendor/versions/v#{version}/#{file_path} ./#{file_path}]
+    end
+
+  end
+end
+
+SwitchVersion.run(ARGV[0])
