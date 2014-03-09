@@ -4,6 +4,7 @@ GEM
     addressable (2.3.5)
     crack (0.4.2)
       safe_yaml (~> 1.0.0)
+    deject (0.2.3)
     diff-lcs (1.2.5)
     rspec (2.14.1)
       rspec-core (~> 2.14.0)
@@ -23,6 +24,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  deject
   rspec
   surrogate
   webmock
