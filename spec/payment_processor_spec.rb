@@ -1,6 +1,12 @@
 require 'spec_helper'
 
 describe PaymentProcessor do
+
+  it 'should receieve mocks that match its dependencies' do
+    PaymentProcessorConnection.should substitute_for MockConnection
+    ChargeResponse.should substitute_for MockResult
+  end
+
   describe '.process' do
 
     subject(:processor) { PaymentProcessor.new }
@@ -14,16 +20,6 @@ describe PaymentProcessor do
 
     before(:each) do
       processor.with_connection(connection).with_result(result)
-    end
-
-    context 'in all cases' do
-      
-      let(:result) {}
-
-      it 'should receieve mocks that match its dependencies' do
-        PaymentProcessorConnection.should substitute_for MockConnection
-        ChargeResponse.should substitute_for MockResult
-      end
     end
 
     context 'when succeeded' do
