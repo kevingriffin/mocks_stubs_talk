@@ -3,18 +3,25 @@ require 'net/http'
 require 'json'
 
 class PaymentProcessor
-  def process(user, payment_information, connection = nil)
+  def process(user, payment_information, connection = nil, result = nil)
     payment_connection = connection || PaymentProcessorConnection.new
+    result             = result || ChargeResponse.new
 
     result_json = payment_connection.post_data(payment_information)
-    result_hash = JSON.parse(result_json)
 
-    if result_hash['object'] == 'charge'
+    result.parse!(result_json)
+
+    if result.success?
       user.paid!
-    else
+    elsif result.failure?
       user.canceled!
+    elsif result.error?
+      puts "Error"
+      user.canceled!
+    else
+      raise 'Unknown state'
     end
 
-    result_hash
+    result
   end
 end
