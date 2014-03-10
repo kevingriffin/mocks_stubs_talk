@@ -7,12 +7,12 @@ class PaymentProcessor
   Deject self
 
   dependency(:connection) { PaymentProcessorConnection.new }
-  dependency(:result) { ChargeResponse.new }
+  dependency(:result) { ChargeResult.new }
 
   def process(user, payment_information)
     result_json = connection.post_data(payment_information)
 
-    result.parse!(result_json)
+    result.parse_response!(result_json)
 
     if result.success?
       user.paid!
