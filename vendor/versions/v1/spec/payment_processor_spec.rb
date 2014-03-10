@@ -52,7 +52,5 @@ def fetch_test_payment_token
 
   result_json = http.request(req).body
 
-  puts result_json
-
   JSON.parse(result_json)['id']
 end
