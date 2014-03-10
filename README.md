@@ -3,7 +3,7 @@ Rolling your Own Mocks and Stubs
 
 Presentations
 ---
-**2014/03/13** [Cookpad](http://www.meetup.com/tokyo-rails/events/166222312/)
+**2014/03/13** [Tokyo Rails](http://www.meetup.com/tokyo-rails/events/166222312/)
 
 
 About the Presentation
