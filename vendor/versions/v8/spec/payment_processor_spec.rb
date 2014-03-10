@@ -4,7 +4,7 @@ describe PaymentProcessor do
 
   it 'should receieve mocks that match its dependencies' do
     PaymentProcessorConnection.should substitute_for MockConnection
-    ChargeResponse.should substitute_for MockResult
+    ChargeResult.should substitute_for MockResult
   end
 
   describe '.process' do
@@ -83,7 +83,7 @@ class MockResult
   Surrogate.endow self
   define(:initialize) { |status:| @status = status }
 
-  define(:parse!) { |result_json| }
+  define(:parse_response!) { |result_json| }
 
   define(:success?) { @status.to_s == 'success' }
   define(:failure?) { @status.to_s == 'failure' }
