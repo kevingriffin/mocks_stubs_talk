@@ -7,3 +7,5 @@ require 'uri'
 require 'net/http'
 require 'webmock/rspec'
 require 'surrogate/rspec'
+
+WebMock.allow_net_connect!
