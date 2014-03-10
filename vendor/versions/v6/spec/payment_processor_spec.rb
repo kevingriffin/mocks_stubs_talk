@@ -69,7 +69,7 @@ class MockResult
     @status = status
   end
 
-  def parse!(result_json)
+  def parse_response!(result_json)
   end
 
   def success?
