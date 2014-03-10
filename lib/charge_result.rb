@@ -1,5 +1,5 @@
-class ChargeResponse
-  def parse!(response_json)
+class ChargeResult
+  def parse_response!(response_json)
   end
 
   def success?
