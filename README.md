@@ -11,7 +11,7 @@ About the Presentation
 
 RSpec and mocha give you great tools for stubbing and mocking the behavior of your dependencies to give you all of the benefits of isolated testing.
 
-Over-replying on these techniques, however, can bind the interface of your mocks to your specs, and allow them to more easily fall out-of-line with the expectations of your real objects. There's a better way!
+Over-relying on these techniques, however, can bind the interface of your mocks to your specs, and allow them to more easily fall out-of-line with the expectations of your real objects. There's a better way!
 
 By looking at the quality and understandability of your sepcs, you can better understand how to group functionality and not mix levels of abstractions—specs shouldn't be ugly or hard to change!
 
