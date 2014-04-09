@@ -13,7 +13,7 @@ RSpec and mocha give you great tools for stubbing and mocking the behavior of yo
 
 Over-relying on these techniques, however, can bind the interface of your mocks to your specs, and allow them to more easily fall out-of-line with the expectations of your real objects. There's a better way!
 
-By looking at the quality and understandability of your sepcs, you can better understand how to group functionality and not mix levels of abstractions—specs shouldn't be ugly or hard to change!
+By looking at the quality and understandability of your specs, you can better understand how to group functionality and not mix levels of abstractions—specs shouldn't be ugly or hard to change!
 
 This talk uses an example of processing payments from [Stripe](https://stripe.com).
 
